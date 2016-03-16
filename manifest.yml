@@ -1,0 +1,4 @@
+applications:
+- name: gobot-starter
+  path: .
+  buildpack: go_buildpack

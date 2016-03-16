@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Gobot</title>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script src="https://code.highcharts.com/stock/highstock.js"></script>
+  <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+  <script type="text/javascript">
+var firstMessage = true;
+var deviceId = '';
+var conn;
+
+
+function initCharts(info) {
+  if (deviceId == "") return;
+
+  config = {
+    rangeSelector: {
+      selected: 0,
+      buttons: [{
+        count: 1,
+        type: 'minute',
+        text: '1M'
+      }, {
+        count: 5,
+        type: 'minute',
+        text: '5M'
+      }, {
+        type: 'all',
+        text: 'All'
+      }],
+        inputEnabled: false,
+        selected: 1
+    },
+
+    title : {
+      text : info.name + ' Fans Speed'
+    },
+
+    exporting: {
+      enabled: false
+    },
+
+    series : []
+  }
+
+  for (var i = 0; i < info.fans_info.length; i++) {
+    config.series.push({
+      id : "fan_" + i,
+      name : "Fan " + (i + 1) + " speed",
+      data : Array(1000).fill(0)
+    })
+    $("<input/>", {
+      id: "fan_" + i,
+      type: "range",
+      min: info.fans_info[i].min,
+      max: info.fans_info[i].max
+    }).val(info.fans_info[i].current).data("n", i).change(function() {
+      conn.send("set_speed/"+$(this).data("n")+"/"+$(this).val())
+    }).appendTo("#controls")
+  }
+
+
+  $('#container').show();
+  $(".brightness-down").show().click(function() {
+    conn.send("dec_brightness")
+  });
+  $(".brightness-up").show().click(function() {
+    conn.send("inc_brightness")
+  })
+
+  $('#cpu_temp').highcharts('StockChart', {
+    rangeSelector: {
+      selected: 0,
+      buttons: [{
+        count: 1,
+        type: 'minute',
+        text: '1M'
+      }, {
+        count: 5,
+        type: 'minute',
+        text: '5M'
+      }, {
+        type: 'all',
+        text: 'All'
+      }],
+        inputEnabled: false,
+        selected: 1
+    },
+
+    title : {
+      text : info.name + ' CPU Temp'
+    },
+
+    exporting: {
+      enabled: false
+    },
+
+    series : [ {
+      id   : "temp",
+      name : 'CPU Temperature',
+      data : Array(1000).fill(0)
+    }]
+  });
+  $('#fans').highcharts('StockChart', config);
+  $('#position').highcharts('StockChart', {
+    rangeSelector: {
+      selected: 0,
+      buttons: [{
+        count: 1,
+        type: 'minute',
+        text: '1M'
+      }, {
+        count: 5,
+        type: 'minute',
+        text: '5M'
+      }, {
+        type: 'all',
+        text: 'All'
+      }],
+        inputEnabled: false,
+        selected: 1
+    },
+
+    title : {
+      text : info.name + ' Position'
+    },
+
+    exporting: {
+      enabled: false
+    },
+
+    series : [ {
+      id   : "x",
+      name : 'X',
+      data : Array(1000).fill(0)
+    },{
+      id   : "y",
+      name : 'Y',
+      data : Array(1000).fill(0)
+    },{
+      id   : "z",
+      name : 'Z',
+      data : Array(1000).fill(0)
+    }
+    ]
+  });
+}
+
+function startWatch() {
+  if (deviceId == "") return;
+
+  conn = new WebSocket("ws://"+ window.location.host +"/ws?device_id="+deviceId);
+
+  conn.onmessage = function(evt) {
+    var x = (new Date()).getTime(), 
+        info = JSON.parse(evt.data).d;
+
+    if (firstMessage) {
+      initCharts(info);
+      firstMessage = false;
+    }
+
+    var chart = $('#cpu_temp').highcharts();
+
+    chart.get("temp").addPoint([x, info.cpu_temp], true, true);
+
+    chart = $('#fans').highcharts();
+    for (var i = 0; i < info.fans_info.length; i++) {
+      series = chart.get("fan_" + i);
+      series.addPoint([x, info.fans_info[i].current], true, true);
+    }
+
+    chart = $("#position").highcharts();
+    chart.get("x").addPoint([x, info.position.x], true, true);
+    chart.get("y").addPoint([x, info.position.y], true, true);
+    chart.get("z").addPoint([x, info.position.z], true, true);
+    
+  }
+}
+$(function() {
+  var url = window.location.href;
+  var regex = new RegExp("[?&]device_id(=([^&#]*)|&|#|$)"), results = regex.exec(url);
+
+  if (results && results[2]) {
+    deviceId = decodeURIComponent(results[2].replace(/\+/g, " "));
+  }
+  $("#device-id").val(deviceId);
+
+  if (deviceId != "") {
+    startWatch();
+  }
+  
+  $("#go-button").click(function() {
+    deviceId = $("#device-id").val();
+    if (deviceId != "") {
+      startWatch();
+    }
+  })
+
+  Highcharts.setOptions({
+    global : {
+      useUTC : false
+    }
+  });
+})
+  </script>
+  <style>
+#container {
+  display: none;
+}
+input[type=text]
+{
+  background-color: rgb(255, 255, 255);
+  border-color: rgb(60, 118, 61);
+  border-style: solid;
+  border-width: 2px;
+  box-sizing: border-box;
+  color: rgb(85, 85, 85);
+  font-family: 'Helvetica Neue', HelveticaNeue, Helvetica, 'Segoe UI', Segoe, Calibri, Roboto, 'Droid Sans', 'Arial Unicode MS', Arial, sans-serif;
+  font-size: 14px;
+  height: 34px;
+  width: 210px;
+  margin: 0px 0px 0px 0px;
+  padding: 6px 10px 9px 6px;
+  vertical-align: middle;
+}
+button {
+  background-color: rgb(34, 66, 87);
+  background-image: none;
+  border-color: rgb(34, 66, 87);
+  border-style: solid;
+  border-width: 1px;
+  box-sizing: border-box;
+  color: rgb(255, 255, 255);
+  font-family: 'Helvetica Neue', HelveticaNeue, Helvetica, 'Segoe UI', Segoe, Calibri, Roboto, 'Droid Sans', 'Arial Unicode MS', Arial, sans-serif;
+  font-size: 14px;
+  height: 34px;
+  width: 45px;
+  margin: 0px 0px 0px 0px;
+  padding: 6px 12px  6px 12px;
+  vertical-align: middle;
+}
+button.brightness-down {
+  background-image: url(static/light-down.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
+  display: none;
+}
+button.brightness-up {
+  background-image: url(static/light-up.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 39px 28px;
+  display: none;
+}
+</style>
+</head>
+<body>
+  <div id="controls">
+  <input type="text" id="device-id" />
+  <button type="submit" id="go-button">Go</button>
+  <button type="submit" class="brightness-down"></button>
+  <button type="submit" class="brightness-up"></button>
+  </div>
+  <div id="container" style="height: 400px; min-width: 310px">
+    <div id="cpu_temp"></div>
+    <div id="fans"></div>
+    <div id="position"></div>
+  </div>
+</body>
+</html>

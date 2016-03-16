@@ -1,0 +1,67 @@
+{
+	"ImportPath": "github.com/nobodyzzz/gobot-starter",
+	"GoVersion": "go1.5.1",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git",
+			"Comment": "v0.9.1-20-g617c801",
+			"Rev": "617c801af238c3af2d9e72c5d4a0f02edad03ce5"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry-community/go-cfenv",
+			"Comment": "v1.12-2-gb4bebec",
+			"Rev": "b4bebec47a425334d2a076cf99329464c9e611f3"
+		},
+		{
+			"ImportPath": "github.com/gin-gonic/gin",
+			"Comment": "v1.0rc1-219-g3d002e3",
+			"Rev": "3d002e382355cafc15d706b92899b1961d5b79e9"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "62e4364d64b32762febb61f2c88c0a29bc49a225"
+		},
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "2dbddebb8266b93c5e6b119efb54e89043186f3f"
+		},
+		{
+			"ImportPath": "github.com/hybridgroup/gobot",
+			"Comment": "v.0.11.1-42-gc480d60",
+			"Rev": "c480d6075470228b923d39dc4b289d6ecef422f1"
+		},
+		{
+			"ImportPath": "github.com/manucorporat/sse",
+			"Rev": "ee05b128a739a0fb76c7ebd3ae4810c1de808d6d"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/mapstructure",
+			"Rev": "281073eb9eb092240d33ef253c404f1cca550309"
+		},
+		{
+			"ImportPath": "github.com/nobodyzzz/gobot/platforms/mqtt",
+			"Comment": "v.0.11.1-68-ga3051c0",
+			"Rev": "a3051c0fcfb267a4561147b5c757d911a1bc9337"
+		},
+		{
+			"ImportPath": "github.com/twinj/uuid",
+			"Rev": "89173bcdda19db0eb88aef1e1cb1cb2505561d31"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "35b06af0720201bc2f326773a80767387544f8c4"
+		},
+		{
+			"ImportPath": "golang.org/x/net/websocket",
+			"Rev": "35b06af0720201bc2f326773a80767387544f8c4"
+		},
+		{
+			"ImportPath": "gopkg.in/go-playground/validator.v8",
+			"Comment": "v8.17.1",
+			"Rev": "014792cf3e266caff1e916876be12282b33059e0"
+		}
+	]
+}
